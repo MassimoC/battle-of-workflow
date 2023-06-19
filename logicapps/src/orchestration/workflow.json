@@ -1,10 +1,239 @@
 {
-  "definition": {
-    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
-    "actions": {},
-    "contentVersion": "1.0.0.0",
-    "outputs": {},
-    "triggers": {}
-  },
-  "kind": "Stateful"
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "DeclareToAuthority": {
+                "type": "Scope",
+                "actions": {
+                    "DeclareParking": {
+                        "type": "ServiceProvider",
+                        "inputs": {
+                            "parameters": {
+                                "entityName": "dapresb",
+                                "message": {
+                                    "contentData": "@body('Parse_JSON')",
+                                    "to": "DeclareParking"
+                                }
+                            },
+                            "serviceProviderConfiguration": {
+                                "connectionName": "serviceBus",
+                                "operationId": "sendMessage",
+                                "serviceProviderId": "/serviceProviders/serviceBus"
+                            }
+                        },
+                        "runAfter": {
+                            "Parse_JSON": [
+                                "SUCCEEDED"
+                            ]
+                        },
+                        "trackedProperties": {}
+                    },
+                    "Parse_JSON": {
+                        "type": "ParseJson",
+                        "inputs": {
+                            "content": "@json(base64ToString(triggerBody()?['ContentData']?['$content']))",
+                            "schema": {
+                                "properties": {
+                                    "data": {
+                                        "items": {
+                                            "properties": {
+                                                "address": {
+                                                    "type": "string"
+                                                },
+                                                "branchCode": {
+                                                    "type": "string"
+                                                },
+                                                "logo": {
+                                                    "type": "string"
+                                                },
+                                                "id": {
+                                                    "type": "integer"
+                                                },
+                                                "name": {
+                                                    "type": "string"
+                                                },
+                                                "openingHours": {
+                                                    "type": "string"
+                                                },
+                                                "timestamp": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "name",
+                                                "address",
+                                                "openingHours",
+                                                "branchCode",
+                                                "logo",
+                                                "timestamp"
+                                            ],
+                                            "type": "object"
+                                        },
+                                        "minItems": 1,
+                                        "type": "array"
+                                    },
+                                    "contenttype": {
+                                        "type": "string"
+                                    },
+                                    "messageid": {
+                                        "type": "string"
+                                    },
+                                    "domain": {
+                                        "type": "string"
+                                    },
+                                    "version": {
+                                        "type": "string"
+                                    },
+                                    "time": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "messageid",
+                                    "contenttype",
+                                    "version",
+                                    "domain",
+                                    "time"
+                                ],
+                                "type": "object",
+                                "$schema": "http://json-schema.org/draft-04/schema"
+                            }
+                        }
+                    }
+                },
+                "runAfter": {},
+                "trackedProperties": {}
+            },
+            "Archive_CivicStructures": {
+                "type": "Scope",
+                "actions": {
+                    "Archive": {
+                        "type": "ServiceProvider",
+                        "inputs": {
+                            "parameters": {
+                                "entityName": "dapresb",
+                                "message": {
+                                    "contentData": "@body('Parse_JSON_again')",
+                                    "to": "Archive"
+                                }
+                            },
+                            "serviceProviderConfiguration": {
+                                "connectionName": "serviceBus",
+                                "operationId": "sendMessage",
+                                "serviceProviderId": "/serviceProviders/serviceBus"
+                            }
+                        },
+                        "runAfter": {
+                            "Parse_JSON_again": [
+                                "SUCCEEDED"
+                            ]
+                        },
+                        "trackedProperties": {}
+                    },
+                    "Parse_JSON_again": {
+                        "type": "ParseJson",
+                        "inputs": {
+                            "content": "@json(base64ToString(triggerBody()?['ContentData']?['$content']))",
+                            "schema": {
+                                "properties": {
+                                    "data": {
+                                        "items": {
+                                            "properties": {
+                                                "address": {
+                                                    "type": "string"
+                                                },
+                                                "branchCode": {
+                                                    "type": "string"
+                                                },
+                                                "logo": {
+                                                    "type": "string"
+                                                },
+                                                "id": {
+                                                    "type": "integer"
+                                                },
+                                                "name": {
+                                                    "type": "string"
+                                                },
+                                                "openingHours": {
+                                                    "type": "string"
+                                                },
+                                                "timestamp": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "name",
+                                                "address",
+                                                "openingHours",
+                                                "branchCode",
+                                                "logo",
+                                                "timestamp"
+                                            ],
+                                            "type": "object"
+                                        },
+                                        "minItems": 1,
+                                        "type": "array"
+                                    },
+                                    "contenttype": {
+                                        "type": "string"
+                                    },
+                                    "messageid": {
+                                        "type": "string"
+                                    },
+                                    "domain": {
+                                        "type": "string"
+                                    },
+                                    "version": {
+                                        "type": "string"
+                                    },
+                                    "time": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "messageid",
+                                    "contenttype",
+                                    "version",
+                                    "domain",
+                                    "time"
+                                ],
+                                "type": "object",
+                                "$schema": "http://json-schema.org/draft-04/schema"
+                            }
+                        }
+                    }
+                },
+                "runAfter": {
+                    "DeclareToAuthority": [
+                        "SUCCEEDED"
+                    ]
+                },
+                "trackedProperties": {}
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "triggers": {
+            "Subscribe_CivicStructures": {
+                "type": "ServiceProvider",
+                "inputs": {
+                    "parameters": {
+                        "topicName": "dapresb",
+                        "subscriptionName": "subscribe-domain",
+                        "isSessionsEnabled": false
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "serviceBus",
+                        "operationId": "receiveTopicMessages",
+                        "serviceProviderId": "/serviceProviders/serviceBus"
+                    }
+                },
+                "trackedProperties": {},
+                "splitOn": "@triggerOutputs()?['body']"
+            }
+        }
+    },
+    "kind": "Stateful"
 }

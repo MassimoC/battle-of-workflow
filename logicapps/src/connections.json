@@ -1,0 +1,24 @@
+{
+  "managedApiConnections": {},
+  "serviceProviderConnections": {
+    "serviceBus": {
+      "parameterValues": {
+        "connectionString": "@appsetting('serviceBus_connectionString')"
+      },
+      "parameterSetName": "connectionString",
+      "serviceProvider": {
+        "id": "/serviceProviders/serviceBus"
+      },
+      "displayName": "ServiceBus"
+    },
+    "AzureFile": {
+      "parameterValues": {
+        "connectionString": "@appsetting('AzureFile_connectionString')"
+      },
+      "serviceProvider": {
+        "id": "/serviceProviders/AzureFile"
+      },
+      "displayName": "storage_account"
+    }
+  }
+}

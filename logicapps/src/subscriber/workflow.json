@@ -1,0 +1,131 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Create_file": {
+                "type": "ServiceProvider",
+                "inputs": {
+                    "parameters": {
+                        "folderPath": "whatever",
+                        "fileName": "@concat(formatDateTime(utcNow(), 'yyyyMMddTHHmmssZ'),'.json')",
+                        "fileContent": "@outputs('Compose')"
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "AzureFile",
+                        "operationId": "createFile",
+                        "serviceProviderId": "/serviceProviders/AzureFile"
+                    }
+                },
+                "runAfter": {
+                    "Compose": [
+                        "SUCCEEDED"
+                    ]
+                }
+            },
+            "Parse_JSON": {
+                "type": "ParseJson",
+                "inputs": {
+                    "content": "@json(triggerBody()?['ContentData'])",
+                    "schema": {
+                        "properties": {
+                            "data": {
+                                "items": {
+                                    "properties": {
+                                        "address": {
+                                            "type": "string"
+                                        },
+                                        "branchCode": {
+                                            "type": "string"
+                                        },
+                                        "logo": {
+                                            "type": "string"
+                                        },
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "name": {
+                                            "type": "string"
+                                        },
+                                        "openingHours": {
+                                            "type": "string"
+                                        },
+                                        "timestamp": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "id",
+                                        "name",
+                                        "address",
+                                        "openingHours",
+                                        "branchCode",
+                                        "logo",
+                                        "timestamp"
+                                    ],
+                                    "type": "object"
+                                },
+                                "minItems": 1,
+                                "type": "array"
+                            },
+                            "contenttype": {
+                                "type": "string"
+                            },
+                            "messageid": {
+                                "type": "string"
+                            },
+                            "domain": {
+                                "type": "string"
+                            },
+                            "version": {
+                                "type": "string"
+                            },
+                            "time": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "messageid",
+                            "contenttype",
+                            "version",
+                            "domain",
+                            "time"
+                        ],
+                        "type": "object",
+                        "$schema": "http://json-schema.org/draft-04/schema"
+                    }
+                },
+                "runAfter": {}
+            },
+            "Compose": {
+                "type": "Compose",
+                "inputs": "@body('Parse_JSON')",
+                "runAfter": {
+                    "Parse_JSON": [
+                        "SUCCEEDED"
+                    ]
+                }
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "triggers": {
+            "When_messages_are_available_in_a_topic": {
+                "type": "ServiceProvider",
+                "inputs": {
+                    "parameters": {
+                        "topicName": "dapresb",
+                        "subscriptionName": "subscribe-archive",
+                        "isSessionsEnabled": false
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "serviceBus",
+                        "operationId": "receiveTopicMessages",
+                        "serviceProviderId": "/serviceProviders/serviceBus"
+                    }
+                },
+                "splitOn": "@triggerOutputs()?['body']"
+            }
+        }
+    },
+    "kind": "Stateful"
+}

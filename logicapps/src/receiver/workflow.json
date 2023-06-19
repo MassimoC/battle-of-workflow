@@ -1,10 +1,252 @@
 {
-  "definition": {
-    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
-    "actions": {},
-    "contentVersion": "1.0.0.0",
-    "outputs": {},
-    "triggers": {}
-  },
-  "kind": "Stateful"
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Parse_Request_Payload": {
+                "type": "ParseJson",
+                "inputs": {
+                    "content": "@triggerBody()",
+                    "schema": {
+                        "properties": {
+                            "data": {
+                                "items": {
+                                    "properties": {
+                                        "address": {
+                                            "type": "string"
+                                        },
+                                        "branchCode": {
+                                            "type": "string"
+                                        },
+                                        "logo": {
+                                            "type": "string"
+                                        },
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "name": {
+                                            "type": "string"
+                                        },
+                                        "openingHours": {
+                                            "type": "string"
+                                        },
+                                        "timestamp": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "id",
+                                        "name",
+                                        "address",
+                                        "openingHours",
+                                        "branchCode",
+                                        "logo",
+                                        "timestamp"
+                                    ],
+                                    "type": "object"
+                                },
+                                "minItems": 1,
+                                "type": "array"
+                            },
+                            "contenttype": {
+                                "type": "string"
+                            },
+                            "messageid": {
+                                "type": "string"
+                            },
+                            "domain": {
+                                "type": "string"
+                            },
+                            "version": {
+                                "type": "string"
+                            },
+                            "time": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "messageid",
+                            "contenttype",
+                            "version",
+                            "domain",
+                            "time"
+                        ],
+                        "type": "object"
+                    }
+                },
+                "runAfter": {
+                    "Tracing": [
+                        "Succeeded"
+                    ]
+                },
+                "trackedProperties": {}
+            },
+            "Return_202_response": {
+                "type": "Response",
+                "kind": "http",
+                "inputs": {
+                    "statusCode": 202,
+                    "body": {
+                        "ActivityId": "@{workflow().run.name}",
+                        "Message": "Accepted",
+                        "StatusCode": 202
+                    }
+                },
+                "runAfter": {
+                    "Publish_Message": [
+                        "Succeeded"
+                    ]
+                }
+            },
+            "Return_500_response": {
+                "type": "Response",
+                "kind": "http",
+                "inputs": {
+                    "statusCode": 500,
+                    "body": {
+                        "ActivityId": "@{workflow().run.name}",
+                        "Message": "Internal Server Error",
+                        "StatusCode": 500
+                    }
+                },
+                "runAfter": {
+                    "Publish_Message": [
+                        "FAILED",
+                        "TIMEDOUT",
+                        "SKIPPED"
+                    ]
+                }
+            },
+            "Terminate_as_Failed_(PublisherDeliveryFailed_InternalException)": {
+                "type": "Terminate",
+                "inputs": {
+                    "runStatus": "Failed",
+                    "runError": {
+                        "code": "PublisherDeliveryFailed_InternalException",
+                        "message": "An exception occurred while processing the message for publishing."
+                    }
+                },
+                "runAfter": {
+                    "Return_500_response": [
+                        "Succeeded"
+                    ]
+                }
+            },
+            "Tracing": {
+                "type": "Compose",
+                "inputs": "@triggerBody()",
+                "runAfter": {},
+                "trackedProperties": {
+                    "ContentType": "@{outputs('Tracing')?['contenttype']}",
+                    "Domain": "@{outputs('Tracing')?['domain']}"
+                }
+            },
+            "Publish_Message": {
+                "type": "ServiceProvider",
+                "inputs": {
+                    "parameters": {
+                        "entityName": "dapresb",
+                        "message": {
+                            "contentData": "@body('Parse_Request_Payload')",
+                            "contentType": "@body('Parse_Request_Payload')['contenttype']",
+                            "userProperties": {
+                                "domain": "@{body('Parse_Request_Payload')['domain']}",
+                                "ctt": "@{body('Parse_Request_Payload')['contenttype']}"
+                            },
+                            "to": "@body('Parse_Request_Payload')['domain']"
+                        }
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "serviceBus",
+                        "operationId": "sendMessage",
+                        "serviceProviderId": "/serviceProviders/serviceBus"
+                    }
+                },
+                "runAfter": {
+                    "Parse_Request_Payload": [
+                        "SUCCEEDED"
+                    ]
+                }
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "triggers": {
+            "Receive_Payload": {
+                "type": "Request",
+                "kind": "Http",
+                "inputs": {
+                    "schema": {
+                        "properties": {
+                            "data": {
+                                "items": {
+                                    "properties": {
+                                        "address": {
+                                            "type": "string"
+                                        },
+                                        "branchCode": {
+                                            "type": "string"
+                                        },
+                                        "logo": {
+                                            "type": "string"
+                                        },
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "name": {
+                                            "type": "string"
+                                        },
+                                        "openingHours": {
+                                            "type": "string"
+                                        },
+                                        "timestamp": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "id",
+                                        "name",
+                                        "address",
+                                        "openingHours",
+                                        "branchCode",
+                                        "logo",
+                                        "timestamp"
+                                    ],
+                                    "type": "object"
+                                },
+                                "minItems": 1,
+                                "type": "array"
+                            },
+                            "contenttype": {
+                                "type": "string"
+                            },
+                            "messageid": {
+                                "type": "string"
+                            },
+                            "domain": {
+                                "type": "string"
+                            },
+                            "version": {
+                                "type": "string"
+                            },
+                            "time": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "messageid",
+                            "contenttype",
+                            "version",
+                            "domain",
+                            "time"
+                        ],
+                        "type": "object"
+                    }
+                },
+                "correlation": {
+                    "clientTrackingId": "@{coalesce(triggerBody()?['id'], guid())}"
+                }
+            }
+        }
+    },
+    "kind": "Stateful"
 }

@@ -1,0 +1,27 @@
+{
+  "messageid": "123456789",
+  "contenttype": "ParkingFacility",
+  "version": "v1",
+  "domain": "CivicStructures",
+  "time": "2023-04-23T18:25:43.511Z",
+  "data": [
+    {
+      "id": 1,
+      "name": "Parking Grand Place",
+      "address": "Grand Place, 1000 Bruxelles, Belgium",
+      "openingHours": "Mo,Tu,Th 08:00-20:00",
+      "branchCode": "1000-P1",
+      "logo": "https://pgp.com",
+      "timestamp": "2020-04-23T18:25:43.511Z"
+    },
+    {
+      "id": 2,
+      "name": "Parking Sint-Michiels",
+      "address": "Sint-Michielsplein 8, 9000 Gent, Belgium",
+      "openingHours": "Mo,Fr,Sa 08:00-20:00",
+      "branchCode": "9700-P7",
+      "logo": "https://psm.com",
+      "timestamp": "2019-04-23T18:25:43.511Z"
+    }
+  ]
+}

@@ -1,11 +1,31 @@
 {
     "version": "2.0",
-    "logging": {
-        "applicationInsights": {
-            "samplingSettings": {
-                "isEnabled": true,
-                "excludedTypes": "Request"
-            }
+    "extensionBundle": {
+      "id": "Microsoft.Azure.Functions.ExtensionBundle.Workflows",
+      "version": " [1, 2.00) "
+    },
+    "extensions": {
+      "workflow": {
+        "Settings": {
+          "Runtime.ApplicationInsightTelemetryVersion": "v2"
         }
+      }
+    },
+    "logging": {
+      "logLevel": {
+        "Workflow.Operations.Runs": "Information",
+        "Workflow.Operations.Actions": "Information",
+        "Workflow.Operations.Triggers": "Information",
+        "Workflow.Operations.Batch": "Error",
+        "Workflow.Host": "Warning",
+        "Workflow.Jobs": "Warning",
+        "Workflow.Runtime": "Warning"
+      },
+      "applicationInsights": {
+        "samplingSettings": {
+          "isEnabled": true,
+          "excludedTypes": "Request"
+        }
+      }
     }
-}
+  }
